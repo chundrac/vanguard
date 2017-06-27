@@ -10,7 +10,6 @@ import random
 from numpy import exp,log
 
 """list of branches representing the following Indo-Aryan tree:
-
 Proto-Indo-Aryan
 >>>>Prakrit
 >>>>Pali
@@ -48,12 +47,11 @@ Proto-Indo-Aryan
 >>>>>>>>Konkani
 >>>>>>>>Marathi
 >>>>Gujarati
-
 Each list within the list has the following structure: [PARENT NODE, CHILD NODE, BRANCH LENGTH]
 (This tree is not meant to be realistic, just for instructional purposes.)
 """
 
-branches = [['Southern_Indo-Aryan', 'Konkani', 1700], ['Southern_Indo-Aryan', 'Marathi', 1700], ['Eastern_Indo-Aryan', 'Assamese', 1700], ['Eastern_Indo-Aryan', 'Bengali', 1700], ['Eastern_Indo-Aryan', 'Maithili', 1700], ['Eastern_Indo-Aryan', 'Oriya', 1700], ['Khari_Boli', 'Hindi', 800], ['Khari_Boli', 'Urdu', 800], ['Northwestern_Indo-Aryan', 'Kashmiri', 1700], ['Northwestern_Indo-Aryan', 'Khowar', 1700], ['Northwestern_Indo-Aryan', 'Sindhi', 1700], ['Northern_Romani', 'Angloromani', 500], ['Northern_Romani', 'Scandoromani', 500], ['Northern_Romani', 'Romani_(Burgenland)', 500], ['Northern_Romani', 'Romani_(Kale)', 500], ['Northern_Romani', 'Romani_(Sinte)', 500], ['Vlax_Romani', 'Romani_(Kelderash)', 500], ['Vlax_Romani', 'Romani_(Lovara)', 500], ['Sinhalese-Maldivian', 'Sinhalese', 1900], ['Sinhalese-Maldivian', 'Maldivian', 1900], ['Romani', 'Romani_(Arli)', 1100], ['Romani', 'Romani_(Sepeides)', 1100], ['Romani', 'Northern_Romani', 600], ['Romani', 'Vlax_Romani', 600], ['Central_Indo-Aryan', 'Khari_Boli', 900], ['Central_Indo-Aryan', 'Punjabi', 1700], ['Central_Indo-Aryan', 'Romani', 600], ['Proto-Indo-Aryan', 'Prakrit', 1450], ['Proto-Indo-Aryan', 'Pali', 1450], ['Proto-Indo-Aryan', 'Central_Indo-Aryan', 1500], ['Proto-Indo-Aryan', 'Eastern_Indo-Aryan', 1500], ['Proto-Indo-Aryan', 'Nepali', 3200], ['Proto-Indo-Aryan', 'Northwestern_Indo-Aryan', 1500], ['Proto-Indo-Aryan', 'Sinhalese-Maldivian', 1300], ['Proto-Indo-Aryan', 'Southern_Indo-Aryan', 1500], ['Proto-Indo-Aryan', 'Gujarati', 3200]]
+branches = [['Southern_Indo-Aryan', 'Konkani', 1700], ['Southern_Indo-Aryan', 'Marathi', 1700], ['Eastern_Indo-Aryan', 'Assamese', 1700], ['Eastern_Indo-Aryan', 'Bengali', 1700], ['Eastern_Indo-Aryan', 'Maithili', 1700], ['Eastern_Indo-Aryan', 'Oriya', 1700], ['Khari_Boli', 'Hindi', 800], ['Khari_Boli', 'Urdu', 800], ['Northwestern_Indo-Aryan', 'Kashmiri', 1700], ['Northwestern_Indo-Aryan', 'Khowar', 1700], ['Northwestern_Indo-Aryan', 'Sindhi', 1700], ['Northern_Romani', 'Angloromani', 500], ['Northern_Romani', 'Scandoromani', 500], ['Northern_Romani', 'Romani_(Burgenland)', 500], ['Northern_Romani', 'Romani_(Kale)', 500], ['Northern_Romani', 'Romani_(Sinte)', 500], ['Vlax_Romani', 'Romani_(Kelderash)', 500], ['Vlax_Romani', 'Romani_(Lovara)', 500], ['Sinhalese-Maldivian', 'Sinhalese', 1900], ['Sinhalese-Maldivian', 'Maldivian', 1900], ['Romani', 'Romani_(Arli)', 1100], ['Romani', 'Romani_(Sepeides)', 1100], ['Romani', 'Northern_Romani', 600], ['Romani', 'Vlax_Romani', 600], ['Central_Indo-Aryan', 'Khari_Boli', 900], ['Central_Indo-Aryan', 'Punjabi', 1700], ['Central_Indo-Aryan', 'Romani', 600], ['Proto-Indo-Aryan', 'Prakrit', 700], ['Proto-Indo-Aryan', 'Pali', 600], ['Proto-Indo-Aryan', 'Central_Indo-Aryan', 1500], ['Proto-Indo-Aryan', 'Eastern_Indo-Aryan', 1500], ['Proto-Indo-Aryan', 'Nepali', 3200], ['Proto-Indo-Aryan', 'Northwestern_Indo-Aryan', 1500], ['Proto-Indo-Aryan', 'Sinhalese-Maldivian', 1300], ['Proto-Indo-Aryan', 'Southern_Indo-Aryan', 1500], ['Proto-Indo-Aryan', 'Gujarati', 3200]]
 
 """list of nodes to be visited by pruning algorithm, in post-traversal order"""
 
@@ -86,7 +84,7 @@ def makemat(a,b,t): #generate transitional matrix from infinitesimal rates (fast
 
 """the following function implements the pruning algorithm"""
 
-def prune(a,b): #compute tree likelihood under current gain and loss rates using pruning algorithm
+def prune(a,b,treelik=True): #compute tree likelihood under current gain and loss rates using pruning algorithm
     for n in pruneorder: #visit each node in post-traversal order
         pi = [0,0] 
         for k in daughters[n]:
@@ -98,8 +96,9 @@ def prune(a,b): #compute tree likelihood under current gain and loss rates using
             pi[0] += log(sum(pi_k[0]))   #probability that node n == 0
             pi[1] += log(sum(pi_k[1]))   #probability that node n == 1
         featdict[n] = tuple(exp(pi))     #store probabilities
-    phi = log(np.dot(featdict[root],[b/(a+b),a/(a+b)]))  #log overall likelihood of tree
-    return phi
+    if treelik==True: #if computing whole tree likelihood rather than computing ancestral state likelihoods for reconstruction
+        phi = log(np.dot(featdict[root],[b/(a+b),a/(a+b)]))  #log overall likelihood of tree
+        return phi
 
 
 posterior=defaultdict()
@@ -144,7 +143,12 @@ def inference(chains=3,iters=100000):
         acc_prop[c]=sum(accepted)/len(accepted)
 
 
+#random.seed(0) #set seeds for duplicability
+#np.random.seed(0)
 
+
+#a_step = .5
+#b_step = .5
 acc_prop={} #data structure for chain acceptance probability (the chain should accept around 23% of proposed states)
 def inference(chains=3,iters=10000):
     global posterior
@@ -152,14 +156,14 @@ def inference(chains=3,iters=10000):
     thin=int(iters/100) #store only a 100th of samples
     for c in range(chains):
         posterior[c]=defaultdict(list)
-        a = uniform(0,1) #initialize gain rate
+        a = uniform(0,.5) #initialize gain rate
         while a == 0: #make sure gain rate > 0
-            a = uniform(0,1)
-        b = uniform(0,1) #initialize loss rate
+            a = uniform(0,.5)
+        b = uniform(0,.5) #initialize loss rate
         while b == 0: #make sure loss rate > 0
-            b = uniform(0,1)
-        a_step = .1           #initialize step sizes for rate proposals
-        b_step = .1
+            b = uniform(0,.5)
+        a_step = .5           #initialize step sizes for rate proposals
+        b_step = .5
         accepted = []
         lp_curr = prune(a,b) #compute likelihood of tree under current a,b
         for t in range(iters):
@@ -184,7 +188,8 @@ def inference(chains=3,iters=10000):
 #                    b_step *= exp(-.5)
 #                if sum(accepted)/len(accepted) > .25:
 #                    a_step *= exp(.5)
-#                    b_step *= exp(.5) 
+#                    b_step *= exp(.5)
+#                print sum(accepted)/len(accepted),a_step,b_step
             if t in range(burnin,iters,thin):
                 posterior[c]['a'].append(a)
                 posterior[c]['b'].append(b)
@@ -197,5 +202,51 @@ def gelmandiag():
     return [(np.var(posterior[0]['a']+posterior[1]['a']+posterior[2]['a'])/((np.var(posterior[0]['a'])+np.var(posterior[1]['a'])+np.var(posterior[2]['a']))/3))**.5,(np.var(posterior[0]['b']+posterior[1]['b']+posterior[2]['b'])/((np.var(posterior[0]['b'])+np.var(posterior[1]['b'])+np.var(posterior[2]['b']))/3))**.5]
 
 
-inference()
+inference(iters=5000)
 gelmandiag()
+
+
+for k in posterior.keys():
+    print 'chain',k,'alpha mean',np.mean(posterior[k]['a']),'std. dev.',np.var(posterior[k]['a'])**.5
+    print 'chain',k,'beta mean',np.mean(posterior[k]['b']),'std. dev.',np.var(posterior[k]['b'])**.5
+
+
+
+"""ancestral state simulation using rates inferred in previous procedure"""
+
+
+states = defaultdict(list) #data structure for sampled ancestral states
+
+
+def ancstate(a,b): #draw ancestral state probabilities, given gain and loss rates
+    prune(a,b,treelik=False) #use pruning algorithm to get likelihoods under a,b
+    state = {} #data structure for currently sampled states
+    preorder = pruneorder[::-1] #list of nodes in pre-traversal order
+    root = preorder[0]
+    pi_root = (a/(a+b))*featdict[root][1]/((b/(a+b))*featdict[root][0]+(a/(a+b))*featdict[root][1]) #p(root=1)
+    state[root] = binomial(1,pi_root)
+    states[root].append(state[root])
+    for n in preorder[1:]: #for all non-root internal nodes
+        s_p = state[mother[n]] #collect currently sampled parent state
+        pi = makemat(a,b,brlen[n]) #transition probabilities
+        pi_n = (featdict[n][1]*pi[s_p][1])/((featdict[n][1]*pi[s_p][1])+(featdict[n][1]*pi[s_p][0])) #p(n=1)
+        state[n] = binomial(1,pi_n)
+        states[n].append(state[n])
+
+"""iteratively sample ancestral states based on posterior rates"""
+
+"""flatten posterior samples for alpha and beta"""
+post_a = posterior[0]['a']+posterior[1]['a']+posterior[2]['a']
+post_b = posterior[0]['b']+posterior[1]['b']+posterior[2]['b']
+
+
+
+for t in range(10000):
+    a = random.sample(post_a,1)[0] #sample from posterior distribution with replacement
+    b = random.sample(post_b,1)[0]
+    ancstate(a,b)
+
+
+"""show averages of samples for each interior node"""
+for k in states.keys():
+    print k,np.mean(states[k])
