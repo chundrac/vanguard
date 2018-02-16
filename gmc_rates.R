@@ -251,3 +251,8 @@ wilcox.test(sumpost[sumpost$rate=='qND',]$value,sumpost[sumpost$rate=='qDN',]$va
 mean(sumpost[sumpost$rate=='qAN',]$value)
 mean(sumpost[sumpost$rate=='qNA',]$value)
 wilcox.test(sumpost[sumpost$rate=='qNA',]$value,sumpost[sumpost$rate=='qAN',]$value)
+
+
+
+
+#see also https://gist.github.com/anonymous/1b0a2b78664b7a33c4e1dce53ba5224b
